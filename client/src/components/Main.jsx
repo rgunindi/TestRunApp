@@ -1,39 +1,70 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import ModalTasks from "./Modal/modal.component";
+
 export default function Main(props) {
   const [tasks, setTasks] = useState([]);
+  const [taskData,setTaskData] = useState([]);
+  const [modal, setModal] = useState([]);
+  const [show, setShow] = useState(false);
+
   useEffect(() => {
     axios.get("http://localhost:8080/api/todos").then((res) => {
       setTasks(res.data);
     });
-
-    // fetch("http://localhost:8080/api/todos")
-    //   .then((res) => res.json())
-    //   .then((data) => setTasks(data));
   }, []);
   useEffect(() => {
     if (tasks.length !== 0) {
-      console.log(tasks);
+      setModal(
+        tasks.map((task, i) => {
+        return {
+          on: false,
+          id: task.id,
+          }})
+          );
     }
   }, [tasks]);
 
-  function handleClick(e) {
-    console.log("HMMM: "+e);
-    axios.get(`http://localhost:8080/api/todos/${e}`);
-   // setTasks(tasks.filter((task) => task.id !== e.target.id));
+  function handleClick(taskid) {
+    axios.get(`http://localhost:8080/api/todos/${taskid}`).then((res) => {
+    });
+  }
+  function handleReportClick(e, taskId) {
+    setShow(()=>!show);
+    console.log(taskId)
+    axios.get(`http://localhost:8080/reports/${taskId}`).then((res) => {
+      setTaskData(res.data);
+    });
+
+    modal.filter((task) => task.id === taskId?
+    setModal((t)=>t.map((task)=>task.id===taskId?{...task,on:!task.on}:task))
+    :null);
+    console.log(modal);
   }
   return (
     <div className="taskmain">
-      <h1>Task List</h1>
-      {tasks.map((task) => (
-        <ul key={task.id}>
+      <fieldset>
+        <legend>Task List</legend>
+        {tasks.map((task) => (
+          <ul key={task.id}>
             <li>Task: {task.task}</li>
             <li>Description: {task.description}</li>
-            <li>status: {task.checked ? "true" : "false"}</li>
-            <input type="button" value="Run Task" onClick={()=>handleClick(task.id)}/>
-        </ul>
-      ))}
-      <button onClick={() => props.page(0)}>Go to Add Task Page</button>
+            <li>status: {task.status ? "true" : "false"}</li>
+            <input
+              type="button"
+              value="Run Task"
+              onClick={() => handleClick(task.id)}
+            />
+            <input
+              type="button"
+              value="Show Reports"
+              onClick={(e) => handleReportClick(e,task.id)}
+            />
+            {show ?<ModalTasks key={task.id} modal={setShow} data={taskData} taskId={task.id} on={modal} status={task.status}/>:null}
+          </ul>
+        ))}
+        <button onClick={() => props.page(0)}>Go to Add Task Page</button>
+      </fieldset>
     </div>
   );
 }

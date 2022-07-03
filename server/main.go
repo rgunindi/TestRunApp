@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,6 +46,7 @@ func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 var todos []Todo
 var UsersSPath string = "./UsersStorage/" + "allFiles" + "/"
+var UsersSReportPath string = "./UsersStorage/Reports/"
 
 func init() {
 	todos = []Todo{}
@@ -69,6 +72,7 @@ func main() {
 		if err != nil {
 			return c.Status(401).SendString("Invalid ID")
 		}
+		report := Report{}
 		go func() {
 			buf := new(bytes.Buffer)
 			todos[id-1].mu.Lock()
@@ -79,7 +83,6 @@ func main() {
 			}
 			pwd, _ := os.Getwd()
 			println(pwd)
-			println(s)
 			cmd := exec.Command("mvn", "verify", "test")
 
 			stdout, err := cmd.StdoutPipe()
@@ -91,19 +94,18 @@ func main() {
 			}
 			buf.ReadFrom(stdout)
 			out := buf.String()
-			out = strings.ReplaceAll(out, "[WARNING]", "")
-			out = strings.ReplaceAll(out, "[INFO]", "")
-			out = strings.ReplaceAll(out, "[ERROR]", "")
-			out = strings.ReplaceAll(out, "\n", "")
-			out = strings.ReplaceAll(out, "\r", "")
-			out = strings.Replace(out, "", "", strings.Index(out, "---"))
 
-			report := Report{Id: id - 1, Name: todos[id-1].Task, Details: out, LoggedAt: time.Now()}
+			re := regexp.MustCompile("(?m)^.[*].*$") //[\r\n]+
+			out = re.ReplaceAllString(out, "")
+			report = Report{Id: id - 1, Name: todos[id-1].Task, Details: out, LoggedAt: time.Now()}
 			content, _ := json.Marshal(report)
 			os.Chdir("../../..")
-			fname := (UsersSPath + "Reports/" + strconv.Itoa(report.Id) + "--" + report.LoggedAt.String() + ".json")
+			fname := (UsersSReportPath + strconv.Itoa(report.Id) + "--" + report.LoggedAt.String() + ".json")
 			fname = strings.ReplaceAll(fname, ":", "")
 			fname = strings.ReplaceAll(fname, " ", "")
+			if _, err := os.Stat(UsersSReportPath); os.IsNotExist(err) {
+				os.MkdirAll(UsersSReportPath, os.ModePerm)
+			}
 			f, _ := os.Create(fname)
 			defer f.Close()
 			n, err := f.Write(content)
@@ -115,12 +117,40 @@ func main() {
 			}
 
 			todos[id-1].mu.Unlock()
-		}()
 
+		}()
 		if todos[id-1].Done = true; todos[id-1].Done {
-			return c.JSON(todos)
+			return c.JSON(fmt.Sprint(todos[id-1].Task, " Task is Running! Don`t forget look at the reports!"))
 		}
 		return c.SendString("id not found!")
+	})
+	app.Get("/reports/:id", func(c *fiber.Ctx) error {
+		id, err := c.ParamsInt("id")
+		id--
+		if err != nil {
+			return c.Status(401).SendString("Invalid ID")
+		}
+		files, err := filepath.Glob(UsersSReportPath + "*.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		var reports []Report
+		for _, file := range files {
+			f, err := os.Open(file)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer f.Close()
+			var report Report
+			jsonParser := json.NewDecoder(f)
+			if err := jsonParser.Decode(&report); err != nil {
+				log.Fatal(err)
+			}
+			if report.Id == id {
+				reports = append(reports, report)
+			}
+		}
+		return c.JSON(reports)
 	})
 	app.Post("/api/todos", func(c *fiber.Ctx) error {
 		todo := &Todo{}

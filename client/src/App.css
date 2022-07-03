@@ -1,3 +1,8 @@
+ul {
+  margin: 0.25rem;
+  padding: 0.25em;
+  list-style: none;
+}
 .App {
   text-align: center;
 }
@@ -36,11 +41,12 @@
     transform: rotate(360deg);
   }
 }
-body{
+body {
+  box-sizing: border-box;
   background-color: #282c34;
   color: whitesmoke;
 }
-.taskList{
+.taskList {
   padding: 40px 15px;
   margin: 0 auto;
   display: flex;
@@ -51,7 +57,7 @@ body{
   box-sizing: border-box;
   max-width: 330px;
 }
-.taskList > .form{
+.taskList > .form {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,16 +67,15 @@ body{
   background-color: transparent;
   color: white;
 }
-.taskList > .form > input{
+.taskList > .form > input {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  /* border: none; */
   border-bottom: 1px solid white;
   border-radius: 5px;
 }
-.taskmain{
-
+.taskmain {
+  margin-top: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -79,12 +84,115 @@ body{
   background-color: transparent;
   color: white;
 }
-.taskmain > ul {
-  list-style: none;
+.taskmain > fieldset > ul {
   text-align: left;
 }
-.taskmain > ul > li{
+.taskmain > fieldset > ul > li {
   font-size: medium;
-  
+
   margin-bottom: 10px;
+}
+.form > input[type="text"] {
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #d65bd9;
+  color: white;
+}
+.form > input[type="button"],
+.form > input[type="file"] {
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #61dafb;
+  border-radius: 5px;
+  background-color: #f071b4;
+  color: black;
+}
+.taskmain > fieldset > ul > textarea {
+  display: block;
+  background-color: red;
+}
+.taskmain > fieldset > ul > input[type="button"] {
+  border-radius: 5px;
+  border: none;
+  margin: 5px;
+  padding: 5px;
+  background-color: red;
+}
+
+button {
+  font-weight: bolder;
+  width: max-content;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f87c68;
+  color: black;
+}
+.modalContainer > button,
+.footer > button {
+  margin-top: 10px;
+  width: 30px;
+  height: 30px;
+  text-align: justify;
+  font-weight: 100;
+  box-sizing: border-box;
+  border: 1px solid #61dafb;
+}
+.modalBackground {
+  width: 90vw;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.modalContainer {
+  width: 80%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  border: 1px dotted #61dafb;
+  border-radius: 5px;
+  box-shadow: 0px 10px 25px whitesmoke;
+  justify-content: center;
+}
+.modalBackground > .modalContainer > .body{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.footer > button {
+  width: min-content;
+  height: min-content;
+  margin: 10px;
+}
+.modalBackground > .modalContainer > .body > fieldset {
+  width: 50%;
+}
+fieldset > ul {
+  font-size: 0.9rem;
+}
+.failure {
+  width: inherit;
+}
+fieldset,
+legend {
+  margin: 0px;
+  border: 1px solid #65faa0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+legend {
+  font-weight: bolder;
+  font-size: medium;
+  width: max-content;
 }

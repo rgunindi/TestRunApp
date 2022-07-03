@@ -1,6 +1,6 @@
 import { useState,useEffect } from "react";
 import Main from "./Main";
-import TaskList from "./TaskList";
+import TaskAdd from "./TaskAdd";
 export default function Manager(props) {
   const [page, setPage] = useState(0);
   useEffect(() => {
@@ -9,7 +9,7 @@ export default function Manager(props) {
 
   return (
     <div className="manager">
-      {page === 0 && <TaskList page={setPage}/>}
+      {page === 0 && <TaskAdd page={setPage}/>}
       {page === 1 && <Main page={setPage}/>}
     </div>
   );
